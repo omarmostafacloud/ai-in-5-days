@@ -1,0 +1,52 @@
+[project]
+name = "dragons-den-agent"
+version = "1.0.0"
+description = "The Dragons' Den: a Google ADK multi-agent architecture review board for Google Cloud PSO"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "google-adk[db,gcp,otel-gcp]==2.14.1",
+    "google-genai>=2.30.0",
+    "pydantic>=2.10",
+    "aiosqlite>=0.20",
+    "asyncpg>=0.30",
+    "google-cloud-secret-manager>=2.20",
+    "google-cloud-dlp>=3.18",
+    "google-cloud-firestore>=2.16",
+    "google-cloud-logging>=3.10",
+    "google-cloud-modelarmor>=0.2",
+    "opentelemetry-sdk>=1.30",
+    "opentelemetry-exporter-gcp-trace>=1.7",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.2", "pytest-asyncio>=0.23", "ruff>=0.6"]
+eval = ["google-adk[eval]==2.14.1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["dragons_den"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py311"
+extend-exclude = [".venv", "terraform"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "RUF"]
+ignore = ["E501", "UP042", "RUF001", "RUF002", "RUF003", "RUF012", "B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["dragons_den", "eval"]

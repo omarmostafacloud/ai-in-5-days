@@ -1,0 +1,6 @@
+[
+  {"decision_id": "DEN-2026-0007", "customer_alias": "Nimbus Bank", "title": "Real-time fraud scoring on GKE + Spanner", "decision": "im_in_with_conditions", "den_score": 78, "summary": "Strong multi-region Spanner design. Conditions: replace exported SA keys with Workload Identity, add VPC-SC perimeter, burn-rate alerting on scoring SLO."},
+  {"decision_id": "DEN-2026-0012", "customer_alias": "Orbit Retail", "title": "Black-Friday storefront on single Compute Engine VM", "decision": "im_out", "den_score": 34, "summary": "Single zonal VM and self-managed MySQL on the request path could not meet 99.9% SLO; no autoscaling; public SSH. Redesign on Cloud Run + Cloud SQL HA behind Cloud Armor."},
+  {"decision_id": "DEN-2026-0019", "customer_alias": "Helix Health", "title": "Clinical notes summarisation with Gemini on Vertex AI", "decision": "im_in_with_conditions", "den_score": 72, "summary": "Good grounding via Vertex AI Search. Conditions: BAA + CMEK on PHI buckets, Model Armor screening, clinician human review before notes are written back to EHR."},
+  {"decision_id": "DEN-2026-0023", "customer_alias": "Volta Energy", "title": "IoT telemetry lakehouse on Pub/Sub, Dataflow and BigQuery", "decision": "im_in", "den_score": 88, "summary": "Well partitioned BigQuery, decoupled ingestion, Terraform everywhere, CUDs on baseline Dataflow. Approved as-is."}
+]

@@ -1,0 +1,17 @@
+google-adk[db,gcp,otel-gcp,eval]==2.14.1
+google-genai>=2.30.0
+pydantic>=2.10
+aiosqlite>=0.20
+asyncpg>=0.30
+google-cloud-secret-manager>=2.20
+google-cloud-dlp>=3.18
+google-cloud-firestore>=2.16
+google-cloud-logging>=3.10
+google-cloud-modelarmor>=0.2
+opentelemetry-sdk>=1.30
+opentelemetry-exporter-gcp-trace>=1.7
+fastapi>=0.115
+uvicorn>=0.30
+pytest>=8.2
+pytest-asyncio>=0.23
+ruff>=0.6

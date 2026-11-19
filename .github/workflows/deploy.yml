@@ -1,0 +1,56 @@
+name: CD - build, provision and deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Keyless auth: GitHub OIDC -> Workload Identity Federation (terraform/iam.tf).
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION || 'us-central1' }}
+  IMAGE: ${{ vars.GCP_REGION || 'us-central1' }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/dragons-den/agent:${{ github.sha }}
+
+jobs:
+  deploy:
+    # Only runs once the GCP project has been configured as a repository variable.
+    if: ${{ vars.GCP_PROJECT_ID != '' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and push image
+        run: |
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker build -t "${IMAGE}" .
+          docker push "${IMAGE}"
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform apply
+        working-directory: terraform
+        run: |
+          terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+          terraform apply -input=false -auto-approve \
+            -var "project_id=${PROJECT_ID}" -var "region=${REGION}" -var "image=${IMAGE}"
+
+      - name: Roll out new revision
+        run: |
+          gcloud run deploy dragons-den --image "${IMAGE}" --region "${REGION}" --project "${PROJECT_ID}" --quiet
+
+      - name: Smoke test
+        run: |
+          URL=$(gcloud run services describe dragons-den --region "${REGION}" --project "${PROJECT_ID}" --format 'value(status.url)')
+          curl -fsS -H "Authorization: Bearer $(gcloud auth print-identity-token)" "${URL}/healthz"
